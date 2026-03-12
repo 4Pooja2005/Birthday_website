@@ -170,7 +170,7 @@ function revealCake() {
    MIC + BLOW DETECTION
    ════════════════════════════════════════ */
 
-const BLOW_THRESHOLD = 10;
+const BLOW_THRESHOLD = 35;
 const REQUIRED_MS = 1500;
 const TICK_MS = 80;
 const GRACE_MS = 400;
