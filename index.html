@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Happy Birthday Uncle 🎂</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="scene">
+
+  <!-- Floating lanterns -->
+  <div class="lantern" style="left:8%;  top:15%; font-size:22px; animation-duration:6s;   animation-delay:0s;">🏮</div>
+  <div class="lantern" style="left:82%; top:22%; font-size:18px; animation-duration:7.5s; animation-delay:1s;">🏮</div>
+  <div class="lantern" style="left:55%; top:8%;  font-size:26px; animation-duration:5.5s; animation-delay:2.5s;">🏮</div>
+
+  <!-- Bear -->
+  <div id="bear">
+    <div class="ear left"></div>
+    <div class="ear right"></div>
+    <div class="face">
+      <div class="muzzle"></div>
+      <div class="cheek-l"></div>
+      <div class="cheek-r"></div>
+    </div>
+    <div class="arm"></div>
+    <div class="body"></div>
+  </div>
+
+  <!-- Speech bubble -->
+  <div id="speech">
+    <span id="dialog"></span>
+    <span class="click-hint" id="clickHint">click to continue →</span>
+  </div>
+
+  <!-- Floor atmosphere -->
+  <div class="floor"></div>
+
+  <!-- Table (slides in from right) -->
+  <div id="table"><div class="cloth"></div></div>
+
+  <!-- Cake area — centred on table, bottom=170px to sit on top of table surface -->
+  <div id="cakeArea">
+    <div id="cake">
+      <div class="frosting"></div>
+      <!-- sprinkles injected by JS -->
+    </div>
+    <!-- Candles are inside cakeArea, positioned absolute at bottom:98px (= cake top) -->
+    <div id="candles">
+      <div class="candle-wrap">
+        <div class="flame"></div>
+        <div class="candle-stick c1"></div>
+      </div>
+      <div class="candle-wrap">
+        <div class="flame"></div>
+        <div class="candle-stick c2"></div>
+      </div>
+      <div class="candle-wrap">
+        <div class="flame"></div>
+        <div class="candle-stick c3"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Blow progress indicator — shows while user is blowing -->
+  <div id="blowRing">
+    <span class="ring-label">🌬️ Keep blowing…</span>
+    <div id="blowBar"><div id="blowFill"></div></div>
+  </div>
+
+  <!-- Birthday banner (overlay) -->
+  <div id="banner">
+    <div class="banner-card">
+      <h1>🎉 Happy Birthday Uncle! 🎉</h1>
+      <div class="banner-divider"></div>
+      <p id="message"></p>
+      <button id="replay">🕯️ Blow Candles Again</button>
+    </div>
+  </div>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
