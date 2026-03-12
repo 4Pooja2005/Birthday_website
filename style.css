@@ -159,15 +159,9 @@ body {
   0%,100% { opacity: 0.5; } 50% { opacity: 1; }
 }
 
-/* ══════════════════════════
-   TABLE
-   Table top surface = bottom:148px, height:22px
-   So table top EDGE = bottom: 170px from viewport bottom
-   Cake area bottom must = 170px to sit on top of table
-   ══════════════════════════ */
 #table {
   position: absolute;
-  bottom: 148px;       /* table top surface starts here */
+  bottom: 148px;     
   right: -320px;
   width: 280px;
   height: 22px;
@@ -195,14 +189,9 @@ body {
   );
 }
 
-/* ══════════════════════════
-   CAKE AREA
-   bottom = table bottom(148) + table height(22) = 170px
-   Cake sits CENTRED horizontally on the table.
-   ══════════════════════════ */
 #cakeArea {
   position: absolute;
-  bottom: 170px;       /* exactly on top of table surface */
+  bottom: 170px;    
   left: 50%;
   transform: translateX(-50%);
   display: none;
@@ -225,7 +214,7 @@ body {
 /* Cake body */
 #cake {
   width: 130px;
-  height: 98px;  /* bottom tier 55px + top tier 43px */
+  height: 98px;
   position: relative;
   margin: 0 auto;
 }
@@ -248,7 +237,7 @@ body {
 /* Frosting on top tier */
 .frosting {
   position: absolute;
-  bottom: 90px;  /* top tier bottom=52, height=46, so top=98. frosting at 90 = near top */
+  bottom: 90px;  
   left: 18px; width: 94px; height: 14px; z-index: 4;
 }
 .frosting::before {
@@ -269,15 +258,9 @@ body {
 }
 .sprinkle { position: absolute; width: 6px; height: 3px; border-radius: 2px; z-index: 5; }
 
-/* ══════════════════════════
-   CANDLES — sit ON TOP of cake
-   #cakeArea is the reference.
-   Cake height = 98px from bottom of #cakeArea.
-   bottom: 98px puts candles exactly at cake top.
-   ══════════════════════════ */
 #candles {
   position: absolute;
-  bottom: 98px;        /* = cake height, so candles rest on top of cake */
+  bottom: 98px;     
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -287,7 +270,7 @@ body {
 }
 .candle-wrap {
   display: flex;
-  flex-direction: column;  /* flame on top, stick on bottom */
+  flex-direction: column;
   align-items: center;
   position: relative;
 }
@@ -490,4 +473,59 @@ body {
   #speech { left: 120px; bottom: 270px; max-width: 200px; font-size: 14px; }
   #table  { width: 200px; }
   .banner-card { padding: 34px 28px; }
+}
+
+
+/* ══════════════════════════
+   RESPONSIVE — MOBILE
+   ══════════════════════════ */
+@media (max-width: 640px) {
+  .floor { height: 110px; }
+
+  #bear {
+    left: 10px;
+    bottom: 110px;   
+    width: 100px;
+    height: 135px;
+    animation: bearBob 3s ease-in-out infinite,
+               bearSlideIn 1s cubic-bezier(.34,1.56,.64,1) both;
+    transform: none;      
+  }
+  
+  #speech {
+    left: 118px;
+    right: 10px;      
+    bottom: 210px;
+    max-width: none;      
+    min-width: 0;
+    font-size: 13px;
+    padding: 12px 14px;
+  }
+
+  #table {
+    width: 200px;
+    height: 18px;
+    bottom: 110px;  
+    right: -220px;  
+  }
+  #table::before,
+  #table::after {
+    height: 58px;
+    bottom: -58px;
+  }
+
+  #cakeArea {
+    bottom: 128px;
+  }
+
+  #blowRing {
+    bottom: 195px;
+  }
+  .banner-card {
+    padding: 30px 22px;
+    margin: 16px;
+  }
+  #banner h1 {
+    font-size: clamp(1.4rem, 7vw, 2rem);
+  }
 }
