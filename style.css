@@ -159,9 +159,12 @@ body {
   0%,100% { opacity: 0.5; } 50% { opacity: 1; }
 }
 
+/* ══════════════════════════
+   TABLE
+   ══════════════════════════ */
 #table {
   position: absolute;
-  bottom: 148px;     
+  bottom: 148px;
   right: -320px;
   width: 280px;
   height: 22px;
@@ -189,9 +192,12 @@ body {
   );
 }
 
+/* ══════════════════════════
+   CAKE AREA
+   ══════════════════════════ */
 #cakeArea {
   position: absolute;
-  bottom: 170px;    
+  bottom: 170px;
   left: 50%;
   transform: translateX(-50%);
   display: none;
@@ -203,7 +209,6 @@ body {
   from { transform: translateX(-50%) scale(0.3) translateY(20px); opacity: 0; }
   to   { transform: translateX(-50%) scale(1) translateY(0); opacity: 1; }
 }
-/* Cake plate */
 #cakeArea::before {
   content: ''; position: absolute; bottom: -5px; left: 50%;
   transform: translateX(-50%); width: 150px; height: 12px;
@@ -218,7 +223,6 @@ body {
   position: relative;
   margin: 0 auto;
 }
-/* Bottom tier */
 #cake::before {
   content: ''; position: absolute; bottom: 0; left: 0;
   width: 130px; height: 55px;
@@ -226,7 +230,6 @@ body {
   border-radius: 8px 8px 12px 12px;
   box-shadow: 0 6px 20px rgba(255,107,138,0.5), inset 0 2px 0 rgba(255,255,255,0.3);
 }
-/* Top tier */
 #cake::after {
   content: ''; position: absolute; bottom: 52px; left: 18px;
   width: 94px; height: 46px;
@@ -234,10 +237,9 @@ body {
   border-radius: 6px 6px 4px 4px;
   box-shadow: 0 4px 14px rgba(255,107,138,0.4), inset 0 2px 0 rgba(255,255,255,0.35);
 }
-/* Frosting on top tier */
 .frosting {
   position: absolute;
-  bottom: 90px;  
+  bottom: 90px;
   left: 18px; width: 94px; height: 14px; z-index: 4;
 }
 .frosting::before {
@@ -258,9 +260,12 @@ body {
 }
 .sprinkle { position: absolute; width: 6px; height: 3px; border-radius: 2px; z-index: 5; }
 
+/* ══════════════════════════
+   CANDLES
+   ══════════════════════════ */
 #candles {
   position: absolute;
-  bottom: 98px;     
+  bottom: 98px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -278,7 +283,6 @@ body {
   width: 12px; height: 28px; border-radius: 4px 4px 2px 2px;
   position: relative; box-shadow: inset -3px 0 0 rgba(0,0,0,0.2); flex-shrink: 0;
 }
-/* Wick */
 .candle-stick::before {
   content: ''; position: absolute; top: -6px; left: 50%;
   transform: translateX(-50%); width: 3px; height: 8px;
@@ -305,7 +309,6 @@ body {
   from { transform: scaleX(1)    scaleY(1)   rotate(-2deg); }
   to   { transform: scaleX(0.85) scaleY(1.1) rotate(2deg);  }
 }
-/* Glow halo */
 .candle-wrap::after {
   content: ''; position: absolute; top: -8px; left: 50%;
   transform: translateX(-50%); width: 52px; height: 52px;
@@ -322,7 +325,6 @@ body {
 .candle-stick.c2 { background: linear-gradient(180deg, #74b9ff, #0984e3); }
 .candle-stick.c3 { background: linear-gradient(180deg, #55efc4, #00b894); }
 
-/* Smoke */
 .smoke {
   position: absolute; top: 0; left: 50%; transform: translateX(-50%);
   width: 6px; height: 6px; background: rgba(200,200,200,0.65);
@@ -466,66 +468,88 @@ body {
 }
 
 /* ══════════════════════════
-   RESPONSIVE
-   ══════════════════════════ */
-@media (max-width: 640px) {
-  #bear   { left: 16px; bottom: 180px; transform: scale(0.8); transform-origin: bottom left; }
-  #speech { left: 120px; bottom: 270px; max-width: 200px; font-size: 14px; }
-  #table  { width: 200px; }
-  .banner-card { padding: 34px 28px; }
-}
-
-
-/* ══════════════════════════
    RESPONSIVE — MOBILE
    ══════════════════════════ */
 @media (max-width: 640px) {
-  .floor { height: 110px; }
 
+  /* ── Floor: shorter so scene has more room ── */
+  .floor { height: 100px; }
+
+  /* ── Bear: upper half, centered ── */
   #bear {
-    left: 10px;
-    bottom: 110px;   
-    width: 100px;
-    height: 135px;
-    animation: bearBob 3s ease-in-out infinite,
-               bearSlideIn 1s cubic-bezier(.34,1.56,.64,1) both;
-    transform: none;      
+    position: absolute;
+    left: 50%;
+    bottom: auto;
+    top: 38%;
+    width: 120px;
+    height: 158px;
+    /* We override bearBob below to keep the translateX(-50%) */
+    animation: bearBobMobile 3s ease-in-out infinite,
+               bearSlideInMobile 1s cubic-bezier(.34,1.56,.64,1) both;
   }
-  
-  #speech {
-    left: 118px;
-    right: 10px;      
-    bottom: 210px;
-    max-width: none;      
-    min-width: 0;
-    font-size: 13px;
-    padding: 12px 14px;
+  @keyframes bearSlideInMobile {
+    from { transform: translateX(-50%) translateY(-30px); opacity: 0; }
+    to   { transform: translateX(-50%) translateY(0);     opacity: 1; }
+  }
+  @keyframes bearBobMobile {
+    0%,100% { transform: translateX(-50%) translateY(0)   rotate(-1deg); }
+    50%     { transform: translateX(-50%) translateY(-8px) rotate(1deg);  }
   }
 
+  /* ── Speech bubble: centered ABOVE bear ── */
+  #speech {
+    position: absolute;
+    left: 11vw;
+    right: 11vw;
+    width: auto;
+    max-width: none;
+    min-width: 0;
+    transform: none;
+    bottom: auto;
+    top: 5%;
+    font-size: 14px;
+    padding: 13px 16px;
+    border-radius: 20px;
+  }
+  /* Remove the left-pointing tail */
+  #speech::before,
+  #speech::after { display: none; }
+
+  /* ── Table: bottom of screen, only ~20% peeking from right ──
+     Table width = 260px. 20% visible = 52px showing.
+     So right = -(260 - 52) = -208px                          ── */
   #table {
-    width: 200px;
-    height: 18px;
-    bottom: 110px;  
-    right: -220px;  
+    width: 260px;
+    height: 20px;
+    bottom: 80px;
+    right: -208px;
+    left: auto;
+    transition: right 1.2s cubic-bezier(.25,.46,.45,.94),
+                left  0.8s cubic-bezier(.25,.46,.45,.94);
   }
   #table::before,
   #table::after {
-    height: 58px;
-    bottom: -58px;
+    height: 60px;
+    bottom: -60px;
   }
 
+  /* ── Cake area: on top of table ──
+     table bottom(80) + table height(20) = 100px             ── */
   #cakeArea {
-    bottom: 128px;
+    bottom: 100px;
   }
 
+  /* ── Blow ring: above the cake ── */
   #blowRing {
-    bottom: 195px;
+    bottom: 210px;
   }
+
+  /* ── Banner card ── */
   .banner-card {
-    padding: 30px 22px;
+    padding: 30px 24px;
     margin: 16px;
   }
   #banner h1 {
-    font-size: clamp(1.4rem, 7vw, 2rem);
+    font-size: clamp(1.5rem, 7vw, 2.2rem);
   }
 }
