@@ -47,7 +47,7 @@ body {
    BEAR
    ══════════════════════════ */
 #bear {
-  position: absolute; left: 90px; bottom: 180px; width: 130px; height: 170px;
+  position: absolute; left: 90px; bottom: 280px; width: 130px; height: 170px;
   animation: bearBob 3s ease-in-out infinite, bearSlideIn 1s cubic-bezier(.34,1.56,.64,1) both;
 }
 @keyframes bearSlideIn {
