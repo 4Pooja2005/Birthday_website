@@ -22,14 +22,7 @@
 /* ── Sprinkles ── */
 (function spawnSprinkles() {
   const cake = document.getElementById("cake");
-  const colors = [
-    "#FF6B8A",
-    "#FFD166",
-    "#06D6A0",
-    "#74B9FF",
-    "#A29BFE",
-    "#FD79A8",
-  ];
+  const colors = ["#FF6B8A","#FFD166","#06D6A0","#74B9FF","#A29BFE","#FD79A8"];
   for (let i = 0; i < 18; i++) {
     const sp = document.createElement("div");
     sp.className = "sprinkle";
@@ -49,15 +42,15 @@ function isMobile() {
 }
 
 /* ── Element refs ── */
-const dialogEl = document.getElementById("dialog");
+const dialogEl  = document.getElementById("dialog");
 const clickHint = document.getElementById("clickHint");
-const tableEl = document.getElementById("table");
-const cakeArea = document.getElementById("cakeArea");
-const banner = document.getElementById("banner");
+const tableEl   = document.getElementById("table");
+const cakeArea  = document.getElementById("cakeArea");
+const banner    = document.getElementById("banner");
 const messageEl = document.getElementById("message");
-const replay = document.getElementById("replay");
-const blowRing = document.getElementById("blowRing");
-const blowFill = document.getElementById("blowFill");
+const replay    = document.getElementById("replay");
+const blowRing  = document.getElementById("blowRing");
+const blowFill  = document.getElementById("blowFill");
 
 /* ── Dialogs ── */
 const dialogs = [
@@ -67,7 +60,7 @@ const dialogs = [
   "Could you pull that table over here? 🎂",
 ];
 
-let step = 0;
+let step   = 0;
 let typing = false;
 
 function typeText(text, onDone) {
@@ -118,26 +111,18 @@ document.body.addEventListener("click", (e) => {
 });
 
 /* ── Table drag ── */
-let dragging = false;
+let dragging     = false;
 let cakeRevealed = false;
 
-tableEl.addEventListener("mousedown", () => {
-  dragging = true;
-});
-document.addEventListener("mouseup", () => {
-  dragging = false;
-});
+tableEl.addEventListener("mousedown", () => { dragging = true; });
+document.addEventListener("mouseup",  () => { dragging = false; });
 document.addEventListener("mousemove", (e) => {
   if (!dragging) return;
   if (e.clientX < window.innerWidth * 0.55) revealCake();
 });
-tableEl.addEventListener(
-  "touchmove",
-  (e) => {
-    if (e.touches[0].clientX < window.innerWidth * 0.55) revealCake();
-  },
-  { passive: true },
-);
+tableEl.addEventListener("touchmove", (e) => {
+  if (e.touches[0].clientX < window.innerWidth * 0.55) revealCake();
+}, { passive: true });
 document.addEventListener("keydown", (e) => {
   if (e.key === "ArrowLeft") revealCake();
 });
@@ -146,16 +131,13 @@ function revealCake() {
   if (cakeRevealed) return;
   cakeRevealed = true;
 
-  tableEl.style.transition =
-    "left 0.8s cubic-bezier(.25,.46,.45,.94), right 0.8s ease";
+  tableEl.style.transition = "left 0.8s cubic-bezier(.25,.46,.45,.94), right 0.8s ease";
 
   if (isMobile()) {
-    // On mobile: center the 260px-wide table
-    tableEl.style.left = "calc(50% - 130px)";
+    tableEl.style.left  = "calc(50% - 130px)";
     tableEl.style.right = "auto";
   } else {
-    // Desktop: existing behaviour
-    tableEl.style.left = "calc(50% - 140px)";
+    tableEl.style.left  = "calc(50% - 140px)";
     tableEl.style.right = "auto";
   }
 
@@ -166,14 +148,12 @@ function revealCake() {
   }, 500);
 }
 
-/* ════════════════════════════════════════
-   MIC + BLOW DETECTION
-   ════════════════════════════════════════ */
-
-const BLOW_THRESHOLD = 35;
-const REQUIRED_MS = 1500;
-const TICK_MS = 80;
-const GRACE_MS = 400;
+const BLOW_ABOVE_BASELINE  = 20;
+const REQUIRED_MS          = 2200;
+const TICK_MS              = 80;
+const GRACE_MS             = 350;
+const BASELINE_SMOOTHING   = 0.02;
+const WARMUP_TICKS         = 15; 
 
 let celebrationDone = false;
 
@@ -183,29 +163,28 @@ function initMicAndListen() {
   navigator.mediaDevices
     .getUserMedia({ audio: true, video: false })
     .then((stream) => {
-      const ctx = new (window.AudioContext || window.webkitAudioContext)();
-      const mic = ctx.createMediaStreamSource(stream);
+      const ctx      = new (window.AudioContext || window.webkitAudioContext)();
+      const mic      = ctx.createMediaStreamSource(stream);
       const analyser = ctx.createAnalyser();
 
       analyser.fftSize = 1024;
-      analyser.smoothingTimeConstant = 0.4;
+      analyser.smoothingTimeConstant = 0.25; 
 
       mic.connect(analyser);
 
       const bufferLength = analyser.frequencyBinCount;
-      const dataArray = new Uint8Array(bufferLength);
+      const dataArray    = new Uint8Array(bufferLength);
 
       blowRing.classList.add("visible");
 
-      let accumulatedMs = 0;
-      let lastBlowTime = null;
-      let graceTimer = null;
+      let accumulatedMs    = 0;
+      let lastBlowTime     = null;
+      let graceTimer       = null;
+      let ambientBaseline  = null;
+      let warmupTicks      = 0;
 
       const ticker = setInterval(() => {
-        if (celebrationDone) {
-          clearInterval(ticker);
-          return;
-        }
+        if (celebrationDone) { clearInterval(ticker); return; }
 
         analyser.getByteFrequencyData(dataArray);
 
@@ -213,15 +192,25 @@ function initMicAndListen() {
         let sum = 0;
         for (let i = 0; i < lower; i++) sum += dataArray[i];
         const avg = sum / lower;
+        if (warmupTicks < WARMUP_TICKS) {
+          warmupTicks++;
+          ambientBaseline = ambientBaseline === null
+            ? avg
+            : ambientBaseline * 0.7 + avg * 0.3; // fast settle during warmup
+          return;
+        }
 
-        if (avg > BLOW_THRESHOLD) {
+        if (avg <= ambientBaseline + BLOW_ABOVE_BASELINE * 0.5) {
+          ambientBaseline = ambientBaseline * (1 - BASELINE_SMOOTHING) + avg * BASELINE_SMOOTHING;
+        }
+
+        const isBlowing = avg > ambientBaseline + BLOW_ABOVE_BASELINE;
+
+        if (isBlowing) {
           if (lastBlowTime !== null) accumulatedMs += Date.now() - lastBlowTime;
           lastBlowTime = Date.now();
 
-          if (graceTimer) {
-            clearTimeout(graceTimer);
-            graceTimer = null;
-          }
+          if (graceTimer) { clearTimeout(graceTimer); graceTimer = null; }
 
           const progress = Math.min((accumulatedMs / REQUIRED_MS) * 100, 100);
           blowFill.style.width = progress + "%";
@@ -317,9 +306,7 @@ replay.addEventListener("click", () => {
 
   cakeRevealed = false;
   tableEl.style.transition = "right 0.8s ease, left 0.8s ease";
-  tableEl.style.left = "auto";
-
-  // On mobile: return to the peek position; on desktop: slide back to right side
+  tableEl.style.left  = "auto";
   tableEl.style.right = isMobile() ? "-208px" : "60px";
 
   cakeArea.style.display = "none";
@@ -329,20 +316,11 @@ replay.addEventListener("click", () => {
 
 /* ── Confetti ── */
 function spawnConfetti() {
-  const colors = [
-    "#FFD166",
-    "#FF6B8A",
-    "#06D6A0",
-    "#118AB2",
-    "#A29BFE",
-    "#FD79A8",
-    "#FFEAA7",
-    "#55EFC4",
-  ];
+  const colors = ["#FFD166","#FF6B8A","#06D6A0","#118AB2","#A29BFE","#FD79A8","#FFEAA7","#55EFC4"];
   for (let i = 0; i < 110; i++) {
     const c = document.createElement("div");
     c.className = "confetti";
-    const size = Math.random() * 8 + 5;
+    const size     = Math.random() * 8 + 5;
     const isCircle = Math.random() > 0.5;
     c.style.cssText = `
       left:${Math.random() * 100}vw;
@@ -360,7 +338,7 @@ function spawnConfetti() {
 
 /* ── Balloons ── */
 function spawnBalloons() {
-  const emojis = ["🎈", "🎈", "🎉", "🎊", "🎈", "⭐", "🌟", "💛"];
+  const emojis = ["🎈","🎈","🎉","🎊","🎈","⭐","🌟","💛"];
   for (let i = 0; i < 12; i++) {
     const b = document.createElement("div");
     b.className = "balloon";
