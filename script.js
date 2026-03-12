@@ -43,6 +43,11 @@
   }
 })();
 
+/* ── Helper: is mobile? ── */
+function isMobile() {
+  return window.innerWidth <= 640;
+}
+
 /* ── Element refs ── */
 const dialogEl = document.getElementById("dialog");
 const clickHint = document.getElementById("clickHint");
@@ -97,7 +102,16 @@ document.body.addEventListener("click", (e) => {
     step++;
     if (step === dialogs.length) {
       setTimeout(() => {
-        tableEl.style.right = window.innerWidth <= 640 ? "20px" : "60px";
+        if (isMobile()) {
+          tableEl.style.transition = "right 0.6s cubic-bezier(.34,1.56,.64,1)";
+          tableEl.style.right = "-190px";
+          setTimeout(() => {
+            tableEl.style.transition = "right 0.4s ease";
+            tableEl.style.right = "-208px";
+          }, 600);
+        } else {
+          tableEl.style.right = "60px";
+        }
       }, 600);
     }
   }
@@ -134,34 +148,38 @@ function revealCake() {
 
   tableEl.style.transition =
     "left 0.8s cubic-bezier(.25,.46,.45,.94), right 0.8s ease";
-  tableEl.style.left = "calc(50% - 140px)";
-  tableEl.style.right = "auto";
+
+  if (isMobile()) {
+    // On mobile: center the 260px-wide table
+    tableEl.style.left = "calc(50% - 130px)";
+    tableEl.style.right = "auto";
+  } else {
+    // Desktop: existing behaviour
+    tableEl.style.left = "calc(50% - 140px)";
+    tableEl.style.right = "auto";
+  }
 
   setTimeout(() => {
     cakeArea.style.display = "block";
     typeText("Make a wish… and blow out the candles! 🌬️✨");
-    initMicAndListen(); // ← mic starts HERE, after table is pulled
+    initMicAndListen();
   }, 500);
 }
 
 /* ════════════════════════════════════════
    MIC + BLOW DETECTION
-   All mic work happens inside initMicAndListen().
-   Nothing audio-related runs before the cake is revealed.
    ════════════════════════════════════════ */
 
-const BLOW_THRESHOLD = 8; // very sensitive — light breath should trigger this
-const REQUIRED_MS = 1500; // 2 seconds total blowing time
-const TICK_MS = 80; // how often we sample
-const GRACE_MS = 400; // if blowing stops briefly, wait this long before resetting
+const BLOW_THRESHOLD = 10;
+const REQUIRED_MS = 1500;
+const TICK_MS = 80;
+const GRACE_MS = 400;
 
 let celebrationDone = false;
 
 function initMicAndListen() {
   if (celebrationDone) return;
 
-  // getUserMedia + AudioContext MUST be called inside/after a user gesture.
-  // revealCake() is triggered by a user action (drag/keydown), so we're safe here.
   navigator.mediaDevices
     .getUserMedia({ audio: true, video: false })
     .then((stream) => {
@@ -170,19 +188,18 @@ function initMicAndListen() {
       const analyser = ctx.createAnalyser();
 
       analyser.fftSize = 1024;
-      analyser.smoothingTimeConstant = 0.4; // less smoothing = faster reaction to stops
+      analyser.smoothingTimeConstant = 0.4;
 
       mic.connect(analyser);
 
       const bufferLength = analyser.frequencyBinCount;
       const dataArray = new Uint8Array(bufferLength);
 
-      // Show the blow progress bar
       blowRing.classList.add("visible");
 
-      let accumulatedMs = 0; // total ms of blowing so far
-      let lastBlowTime = null; // timestamp of last detected blow tick
-      let graceTimer = null; // timeout before resetting on silence
+      let accumulatedMs = 0;
+      let lastBlowTime = null;
+      let graceTimer = null;
 
       const ticker = setInterval(() => {
         if (celebrationDone) {
@@ -192,23 +209,15 @@ function initMicAndListen() {
 
         analyser.getByteFrequencyData(dataArray);
 
-        // Lower third of spectrum — blowing is richest there
         const lower = Math.floor(bufferLength / 3);
         let sum = 0;
         for (let i = 0; i < lower; i++) sum += dataArray[i];
         const avg = sum / lower;
 
-        // DEBUG: uncomment to tune threshold in DevTools
-        // console.log('blow avg:', avg.toFixed(1));
-
         if (avg > BLOW_THRESHOLD) {
-          // Blowing detected — accumulate time
-          if (lastBlowTime !== null) {
-            accumulatedMs += Date.now() - lastBlowTime;
-          }
+          if (lastBlowTime !== null) accumulatedMs += Date.now() - lastBlowTime;
           lastBlowTime = Date.now();
 
-          // Cancel any pending grace reset
           if (graceTimer) {
             clearTimeout(graceTimer);
             graceTimer = null;
@@ -225,7 +234,6 @@ function initMicAndListen() {
             extinguishCandles();
           }
         } else {
-          // No blow this tick — start grace period before resetting
           lastBlowTime = null;
           if (!graceTimer && accumulatedMs > 0) {
             graceTimer = setTimeout(() => {
@@ -241,18 +249,16 @@ function initMicAndListen() {
       console.warn("Mic not available:", err);
       blowRing.classList.remove("visible");
 
-      // Fallback — clicking candles blows them out
       const candlesEl = document.getElementById("candles");
       candlesEl.style.cursor = "pointer";
       candlesEl.title = "🌬️ Click to blow out the candles!";
       candlesEl.addEventListener("click", extinguishCandles, { once: true });
 
-      // Also show a hint
       typeText("(No mic? Just click the candles to blow them out! 🌬️)");
     });
 }
 
-/* ── Extinguish candles → 1s pause → show banner ── */
+/* ── Extinguish candles ── */
 function extinguishCandles() {
   if (celebrationDone) return;
   celebrationDone = true;
@@ -262,7 +268,6 @@ function extinguishCandles() {
   document.querySelectorAll(".candle-wrap").forEach((wrap) => {
     const flame = wrap.querySelector(".flame");
     if (flame) {
-      // Smoke puff
       const smoke = document.createElement("div");
       smoke.className = "smoke";
       wrap.appendChild(smoke);
@@ -272,7 +277,6 @@ function extinguishCandles() {
     wrap.classList.add("extinguished");
   });
 
-  // Wait exactly 1 second before showing the banner
   setTimeout(showBanner, 1000);
 }
 
@@ -297,7 +301,6 @@ function showBanner() {
 replay.addEventListener("click", () => {
   banner.classList.remove("show");
 
-  // Relight candles
   document.querySelectorAll(".candle-wrap").forEach((wrap) => {
     wrap.classList.remove("extinguished");
     if (!wrap.querySelector(".flame")) {
@@ -312,11 +315,13 @@ replay.addEventListener("click", () => {
   celebrationDone = false;
   blowFill.style.width = "0%";
 
-  // Slide table back, hide cake
   cakeRevealed = false;
   tableEl.style.transition = "right 0.8s ease, left 0.8s ease";
   tableEl.style.left = "auto";
-  tableEl.style.right = window.innerWidth <= 640 ? "20px" : "60px";
+
+  // On mobile: return to the peek position; on desktop: slide back to right side
+  tableEl.style.right = isMobile() ? "-208px" : "60px";
+
   cakeArea.style.display = "none";
 
   typeText("Let's do it again! Pull the table back! 🎉");
