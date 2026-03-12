@@ -97,7 +97,7 @@ document.body.addEventListener("click", (e) => {
     step++;
     if (step === dialogs.length) {
       setTimeout(() => {
-        tableEl.style.right = "60px";
+        tableEl.style.right = window.innerWidth <= 640 ? "20px" : "60px";
       }, 600);
     }
   }
@@ -316,7 +316,7 @@ replay.addEventListener("click", () => {
   cakeRevealed = false;
   tableEl.style.transition = "right 0.8s ease, left 0.8s ease";
   tableEl.style.left = "auto";
-  tableEl.style.right = "60px";
+  tableEl.style.right = window.innerWidth <= 640 ? "20px" : "60px";
   cakeArea.style.display = "none";
 
   typeText("Let's do it again! Pull the table back! 🎉");
